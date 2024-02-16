@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>测试返回</title>
+    <style>
+        body {
+            margin: 0;
+        }
+        ul,li{
+          list-style:none;
+        }
+
+    </style>
+</head>
+
+<body>
+<div class="wrapper">
+    <button onClick="back()">返回首页</button>
+    <br/>
+    <br/> <br/>
+    <br/>
+
+    <button  onClick="download()">a download</button>
+    <br/>
+    <br/> <br/>
+    <a href="https://www.baidu.com">baidu01</a>
+    <br/>
+    <br/> <br/>
+
+    <a href="https://www.baidu.com" targer="_blank">baidublank</a>
+    <br/>
+    <br/>
+    <br/> <br/>
+
+    <a href="https://www.baidu.com" targer="_self">baiduself</a>
+    <br/>
+    <br/> <br/>
+
+    <a href="https://www.baidu.com" targer="_top">baidu02top</a>
+    <br/>
+    <br/> <br/>
+    <br/>
+
+    <a href="https://www.baidu.com" targer="_parent">baidu_parent</a>
+
+    <br/>
+    <br/> <br/>
+    <br/>
+    <a href="file:///android_assetloadUrlTest.html" targer="_blank">android_assetloadUrlTest</a>
+    <br/>
+    <br/> <br/>
+    <br/>
+
+    <button onClick="startRecord()">开始录音</button>
+    <button  onClick="endRecord()">结束录音</button>
+    <br/> <br/>
+    <br/>
+        <audio id="testAudio" controls></audio>
+    <br/> <br/>
+    <br/>
+</div>
+
+<script src="./js/jsBridge.js"></script>
+<script>
+        function back(){
+           console.log("返回",window.postWithCallback);
+           if(window.postWithCallback){
+             window.postWithCallback("goBack",{"fromUrl":"layoutHtml"},(response)=>{
+                console.log("response",JSON.stringify(response));
+                document.body.style.backgroundColor="#f00";
+             });
+           }
+        }
+        function download(){
+          const canvas=document.createElement("canvas");
+          canvas.width=200;
+          canvas.height=200;
+          const ctx=canvas.getContext("2d");
+          ctx.fillStyle="#f00";
+          ctx.fillRect(0,0,200,200);
+          const url=canvas.toDataURL();
+          const a=document.createElement("a");
+          a.download="test.png";
+          a.href=url;
+          document.body.appendChild(a);
+          a.click();
+          console.log("a click download");
+          setTimeout(function(){
+            a.remove();
+          })
+        }
+
+        function startRecord(){
+          console.log("开始录音js");
+           if(window.postWithCallback){
+             window.postWithCallback("recordVoice",{type:"start"},(response)=>{
+                console.log("开始录音response",typeof(response),JSON.stringify(response));
+             });
+           }
+        }
+
+         function endRecord(){
+          console.log("结束录音js");
+           if(window.postWithCallback){
+             window.postWithCallback("recordVoice",{type:"end"},(response)=>{
+                console.log("结束录音response",typeof(response),JSON.stringify(response));
+                if(typeof(response)==="object"){
+                    const audioDom=document.getElementById("testAudio");
+                      console.log("获取到录音数据",response);
+                       console.log("audioDom",audioDom);
+                    if(!audioDom){
+                        return;
+                    }
+                    if(!response||!response.audioBase64){
+                            console.log("录音异常");
+                    }
+                    console.log("录音成功",response.audioBase64);
+                    audioDom.src="data:audio/aac;base64,"+response.audioBase64;
+
+                }
+             });
+           }
+        }
+
+</script>
+</body>
+
+</html>
